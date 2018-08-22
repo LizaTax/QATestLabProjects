@@ -3,63 +3,55 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
 public class Homework {
+
+    private static final String EMAIL = "webinar.test@gmail.com";
+    private static final String PASSWORD = "Xcg7299bnSmMuRLp9ITw";
+
     public static void main(String[] args){
         WebDriver driver = getInitFirefoxDriver();
         // скрипт №1
-        login(driver, "webinar.test@gmail.com", "Xcg7299bnSmMuRLp9ITw");
+        login(driver, EMAIL, PASSWORD);
         waitForLoad();
         logout(driver);
 
         // скрипт №2
-        login(driver, "webinar.test@gmail.com", "Xcg7299bnSmMuRLp9ITw");
+        login(driver, EMAIL, PASSWORD);
         waitForLoad();
 
-        String [] menuTabs = {"AdminParentOrders", "AdminParentCustomer", "AdminParentCustomerThreads", "AdminStats",
-                "AdminParentThemes", "AdminParentShipping", "AdminParentPayment", "AdminInternational", "ShopParameters", "AdminAdvancedParameters"};
-        for(int i = 0; i < menuTabs.length; i++) {
-            driver.findElement(By.id(String.format("subtab-%s",menuTabs[i]))).click();
+        // TODO: добавить в массив id для элементов "Каталог" и "Modules" после устранения багов верстки на сайте
+        // После открытия элементов меню "Каталог" и "Modules" исчезают id всех других элементов меню, также для этих элементов отличается верстка
+        // заголовка страницы, что делает невозможным написать подходящие локаторы для всех элементов меню, чтобы проверить их последовательно в цикле
+
+        String [] tabId = {"tab-AdminDashboard", "subtab-AdminParentOrders", "subtab-AdminParentCustomer", "subtab-AdminParentCustomerThreads",
+                "subtab-AdminStats", "subtab-AdminParentThemes", "subtab-AdminParentShipping",
+                "subtab-AdminParentPayment", "subtab-AdminInternational", "subtab-ShopParameters", "subtab-AdminAdvancedParameters"};
+        for (String menuTab : tabId) {
+            driver.findElement(By.id(menuTab)).click();
             String s = driver.findElement(By.className("page-title")).getText();
             System.out.println(s);
             driver.navigate().refresh();
             waitForLoad();
-            if (!(driver.findElement(By.className("page-title")).getText().equals(s))) {
+            boolean result = driver.findElement(By.className("page-title")).getText().equals(s);
+            if (!result) {
                 throw new RuntimeException("Element with text " + s + " not found!");
             }
-        }
-
-        driver.findElement(By.id("subtab-AdminCatalog")).click();
-        String s = driver.findElement(By.cssSelector(".header-toolbar > h2")).getText();
-        System.out.println(s);
-        driver.navigate().refresh();
-        waitForLoad();
-        if (!(driver.findElement(By.cssSelector(".header-toolbar > h2")).getText().equals(s))) {
-            throw new RuntimeException("Element with text " + s + " not found!");
-        }
-
-        driver.findElement(By.cssSelector(".main-menu > li:nth-child(9)")).click();
-        String str = driver.findElement(By.cssSelector(".header-toolbar > h2")).getText();
-        System.out.println(str);
-        driver.navigate().refresh();
-        waitForLoad();
-        if (!(driver.findElement(By.cssSelector(".header-toolbar > h2")).getText().equals(str))) {
-            throw new RuntimeException("Element with text " + s + " not found!");
         }
         driver.close();
     }
 
-    public static void login(WebDriver driver, String email, String password) {
+    private static void login(WebDriver driver, String email, String password) {
         driver.get("http://prestashop-automation.qatestlab.com.ua/admin147ajyvk0/");
         driver.findElement(By.id("email")).sendKeys(email);
         driver.findElement(By.id("passwd")).sendKeys(password);
         driver.findElement(By.name("submitLogin")).click();
     }
 
-    public static void logout(WebDriver driver) {
+    private static void logout(WebDriver driver) {
         driver.findElement(By.className("employee_avatar_small")).click();
         driver.findElement(By.id("header_logout")).click();
     }
 
-    public static WebDriver getInitFirefoxDriver(){
+    private static WebDriver getInitFirefoxDriver(){
         System.setProperty("webdriver.gecko.driver",  Homework.class.getResource("geckodriver.exe").getPath());
         return new FirefoxDriver();
     }
@@ -71,5 +63,4 @@ public class Homework {
             e.printStackTrace();
         }
     }
-
 }
